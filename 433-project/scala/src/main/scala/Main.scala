@@ -1,8 +1,16 @@
 object Main {
   def main(args: Array[String]): Unit = {
     if (args(0) == "master")
-      println("master")
+      master()
     else
-      println("slave")
+      slave()
+  }
+
+  def master(): Unit = {
+    Master.main(Array())
+  }
+
+  def slave(): Unit = {
+    Slave.main(Array())
   }
 }

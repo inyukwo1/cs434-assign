@@ -3,6 +3,9 @@ services:
   master:
     image: cs434project:0.1
     command: master
+    network_mode: "host"        
   slave:
     image: cs434project:0.1
     command: slave
+    network_mode: "host"        
+
