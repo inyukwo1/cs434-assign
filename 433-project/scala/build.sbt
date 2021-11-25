@@ -4,9 +4,9 @@ version := "0.1"
 
 scalaVersion := "2.12.10"
 
-packageName in Docker := "cs434project"
+Docker / packageName := "cs434project"
 
-mainClass in Compile := Some("Main")
+Compile / mainClass := Some("Main")
 
 enablePlugins(JavaAppPackaging)
 
@@ -20,3 +20,11 @@ libraryDependencies ++= Seq(
   "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
   "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
 )
+
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.10"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+
+libraryDependencies += "junit" % "junit" % "4.10" % "test"
+
+resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"

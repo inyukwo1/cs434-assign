@@ -4,6 +4,8 @@ services:
     image: cs434project:0.1
     command: master
     network_mode: "host"        
+    volumes:
+      - data/:/data
   slave:
     image: cs434project:0.1
     command: slave

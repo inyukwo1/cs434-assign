@@ -5,9 +5,6 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 
-/**
- * [[https://github.com/grpc/grpc-java/blob/v0.15.0/examples/src/main/java/io/grpc/examples/helloworld/HelloWorldClient.java]]
- */
 object Slave {
   def apply(host: String, port: Int): Slave = {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
