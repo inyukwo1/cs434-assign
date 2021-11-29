@@ -2,12 +2,19 @@ version: '3'
 services:
   master:
     image: cs434project:0.1
-    command: master
+    command: master 2
     network_mode: "host"        
     volumes:
-      - data/:/data
-  slave:
+      - ./data/:/data
+  slave1:
     image: cs434project:0.1
-    command: slave
-    network_mode: "host"        
-
+    command: slave 127.0.0.1:50051 -I /data/input1 /data/input2 -O /data/output
+    network_mode: "host"
+    volumes:
+      - ./data/slave1/:/data
+  slave2:
+    image: cs434project:0.1
+    command: slave 127.0.0.1:50051 -I /data/input1 /data/input2 -O /data/output
+    network_mode: "host"  
+    volumes:
+      - ./data/slave2/:/data      

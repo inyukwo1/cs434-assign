@@ -1,6 +1,6 @@
-import com.example.protos.hello.{GreeterGrpc, HelloRequest, HelloReply}
+import com.example.protos.main.{MainGrpc, HandShakeReply, HandShakeRequest}
 import io.grpc.{Server, ServerBuilder}
-
+import java.net._
 import java.util.logging.Logger
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,7 +11,7 @@ object Master {
   private val logger = Logger.getLogger(classOf[Master].getName)
 
   def main(args: Array[String]): Unit = {
-    val server = new Master(ExecutionContext.global)
+    val server = new Master(ExecutionContext.global, args(1).toInt)
     server.start()
     server.blockUntilShutdown()
   }
@@ -19,17 +19,24 @@ object Master {
   private val port = 50051
 }
 
-class Master(executionContext: ExecutionContext) { self =>
+class Master(executionContext: ExecutionContext, numSlaves: Int) { self =>
   private[this] var server: Server = null
 
   def start(): Unit = {
-    server = ServerBuilder.forPort(Master.port).addService(GreeterGrpc.bindService(new GreeterImpl, executionContext)).build.start
-    Master.logger.info("Server started, listening on " + Master.port)
     sys.addShutdownHook {
       System.err.println("*** shutting down gRPC server since JVM is shutting down")
       self.stop()
       System.err.println("*** server shut down")
     }
+    val masterLogicToGRPCServer: MasterLogicToGRPCServer = new MasterLogicToGRPCServer(numSlaves)
+
+    server = ServerBuilder.forPort(Master.port).addService(MainGrpc.bindService(new MasterServerImpl(masterLogicToGRPCServer), executionContext)).build.start
+    val localhost: InetAddress = InetAddress.getLocalHost
+    val localIpAddress: String = localhost.getHostAddress
+    Master.logger.info("Server started, listening on " + localIpAddress + ":" + Master.port)
+    val masterLogic = new MasterLogic(masterLogicToGRPCServer)
+    masterLogic.logic()
+    stop()
   }
 
   private def stop(): Unit = {
@@ -43,12 +50,4 @@ class Master(executionContext: ExecutionContext) { self =>
       server.awaitTermination()
     }
   }
-
-  private class GreeterImpl extends GreeterGrpc.Greeter {
-    override def sayHello(req: HelloRequest) = {
-      val reply = HelloReply(message = "Hello " + req.name)
-      Future.successful(reply)
-    }
-  }
-
 }

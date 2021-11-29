@@ -1,2 +1,2 @@
 #!/bin/bash#
-docker run -v  $(pwd)/../data:/data valsort "$1"
+docker run -v  $(pwd)/../data:/data valsort "$@"

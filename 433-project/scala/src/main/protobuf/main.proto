@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package com.example.protos;
+
+service Main {
+  rpc HandShake (HandShakeRequest) returns (HandShakeReply) {}
+  rpc ReceiveSampledKeys(ReceiveSampledKeysRequest) returns (ReceiveSampledKeysReply) {}
+  rpc ShareSampledKeys(ShareSampledKeysRequest) returns (ShareSampledKeysReply) {}
+  rpc RequestDataOnce(RequestDataOnceRequest) returns (RequestDataOnceReply) {}
+  rpc SendData(SendDataRequest) returns (SendDataReply) {}
+}
+
+message HandShakeRequest {
+  string ip = 1;
+  string id = 2;
+}
+
+message HandShakeReply {
+  int32 numSlaves = 1;
+}
+
+message ReceiveSampledKeysRequest {
+  repeated string sampledKeys = 1;
+}
+
+message ReceiveSampledKeysReply {
+}
+
+message ShareSampledKeysRequest {
+
+}
+
+message ShareSampledKeysReply {
+  repeated string sampledKeys = 1;
+}
+
+message RequestDataOnceRequest {
+  repeated string data = 1;
+}
+
+message RequestDataOnceReply {
+
+}
+
+message SendDataRequest {
+  string id = 1;
+}
+
+message SendDataReply {
+  int32 index = 1;
+  repeated string data = 2;
+}

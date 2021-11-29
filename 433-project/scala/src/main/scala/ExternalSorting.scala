@@ -16,7 +16,7 @@ case class ExternalSorting(inputFile: String, outputFile: String, capacity: Int)
       case it if it.isEmpty => None
       case nonEmptyIterator => {
         val block: mutable.Buffer[Array[Byte]] = nonEmptyIterator.toBuffer
-        ExternalSorting.saveToFile(block.sortWith(SortUtils.compare))
+        ExternalSorting.saveToFile(outputFile, block.sortWith(SortUtils.compare))
       }
     }
   }
@@ -24,16 +24,15 @@ case class ExternalSorting(inputFile: String, outputFile: String, capacity: Int)
   def sort(): Unit = {
     val intermediateFiles =
       Stream from 1 map (x => writeNextSortedBlock) takeWhile (_.isDefined) map (_.get)
-    println(intermediateFiles.toList.length)
     ExternalSorting.merge(outputFile, intermediateFiles: _*)
   }
 }
 
 object ExternalSorting {
 
-  def saveToFile(sortedLines: mutable.Buffer[Array[Byte]]): Option[String] = {
+  def saveToFile(prefix: String, sortedLines: mutable.Buffer[Array[Byte]]): Option[String] = {
     Try {
-      val tempFilePath = "tmp" + java.util.UUID.randomUUID.toString
+      val tempFilePath = prefix + "tmp" + java.util.UUID.randomUUID.toString
       val writer = new GensortFileWriter(tempFilePath)
       sortedLines.foreach(line=>writer.write(line))
       writer.close()
