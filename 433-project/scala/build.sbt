@@ -6,7 +6,7 @@ scalaVersion := "2.12.10"
 
 Docker / packageName := "cs434project"
 
-Compile / mainClass := Some("Main")
+mainClass := Some("Main")
 
 enablePlugins(JavaAppPackaging)
 
