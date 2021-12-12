@@ -7,10 +7,11 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
     val (ips: ListBuffer[String], ids: ListBuffer[String]) = handShake()
     println(ips.mkString(", "))
     val samplesKeys: List[Array[Byte]] = receiveSampledKeys()
+
     def toDistinct(head: Array[Byte], sampledKeys: List[Array[Byte]]): List[Array[Byte]] = {
-      if (samplesKeys.isEmpty) head :: List()
-      else if (SortUtils.compareInt(head, sampledKeys.head) == 0) toDistinct(head, samplesKeys.tail)
-      else head :: toDistinct(sampledKeys.head, samplesKeys.tail)
+      if (sampledKeys.isEmpty) head :: List()
+      else if (SortUtils.compareInt(head, sampledKeys.head) == 0) toDistinct(head, sampledKeys.tail)
+      else head :: toDistinct(sampledKeys.head, sampledKeys.tail)
     }
     val sorted = samplesKeys.sortWith(SortUtils.compare)
     val sortedSampledKeys = toDistinct(sorted.head, sorted.tail)
