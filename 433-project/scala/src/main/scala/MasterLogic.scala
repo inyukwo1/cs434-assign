@@ -20,7 +20,7 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
     shareSampledKeys(sortedSampledKeys)
     val sampledKeysLength = sortedSampledKeys.length
     logger.info("Sampled keys length: " + sampledKeysLength)
-    List.range(0, sampledKeysLength + 1).foreach((index: Int)=> {
+    List.range(0, sampledKeysLength).foreach((index: Int)=> {
       logger.info("Receive / Distributing: " + index + ", " + SortUtils.bytesToString(sortedSampledKeys(index)))
       val receivedData: List[Array[Byte]] = requestDataOnce()
       logger.info("Received: " + receivedData.length + ", " + masterLogicToGRPCServer.responseCount)
@@ -29,6 +29,9 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
       val targetId = ids(targetSlaveIndex)
       sendData(index, sortedReceivedData, targetId)
     })
+    val receivedData: List[Array[Byte]] = requestDataOnce()
+    val sortedReceivedData = receivedData.sortWith(SortUtils.compare)
+    sendData(sampledKeysLength, sortedReceivedData, ids.last)
     logger.info("Done")
   }
 
