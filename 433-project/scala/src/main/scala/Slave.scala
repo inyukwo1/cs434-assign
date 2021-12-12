@@ -16,7 +16,7 @@ object Slave {
     new Slave(channel, blockingStub, inputDirs, outputDir)
   }
 
-  def main(args: Array[String]): Unit = {
+  def main_(args: Array[String]): Unit = {
     println(args.mkString(" "))
     val idxcolon = args(1).indexOf(":")
     val client = Slave(args(1).substring(0, idxcolon), args(1).substring(idxcolon + 1).toInt, args.slice(2, args.length - 2), args(args.length - 1))

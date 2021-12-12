@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object Master {
   private val logger = Logger.getLogger(classOf[Master].getName)
 
-  def main(args: Array[String]): Unit = {
+  def main_(args: Array[String]): Unit = {
     val server = new Master(ExecutionContext.global, args(1).toInt)
     server.start()
     server.blockUntilShutdown()

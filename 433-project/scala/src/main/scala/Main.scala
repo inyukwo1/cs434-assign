@@ -7,10 +7,10 @@ object Main {
   }
 
   def master(args: Array[String]): Unit = {
-    Master.main(args)
+    Master.main_(args)
   }
 
   def slave(args: Array[String]): Unit = {
-    Slave.main(args)
+    Slave.main_(args)
   }
 }
