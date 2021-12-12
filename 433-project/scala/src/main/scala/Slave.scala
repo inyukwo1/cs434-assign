@@ -11,7 +11,7 @@ import scala.collection.parallel.mutable.ParArray
 
 object Slave {
   def apply(host: String, port: Int, inputDirs: Array[String], outputDir: String): Slave = {
-    val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
+    val channel = ManagedChannelBuilder.forAddress(host, port).maxInboundMessageSize(32000000).usePlaintext().build
     val blockingStub = MainGrpc.blockingStub(channel)
     new Slave(channel, blockingStub, inputDirs, outputDir)
   }
