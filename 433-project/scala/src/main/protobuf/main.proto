@@ -13,10 +13,11 @@ service Main {
 message HandShakeRequest {
   string ip = 1;
   string id = 2;
+  int32 threadsPerNode = 3;
 }
 
 message HandShakeReply {
-  int32 numSlaves = 1;
+  int32 numThreads = 1;
 }
 
 message ReceiveSampledKeysRequest {
