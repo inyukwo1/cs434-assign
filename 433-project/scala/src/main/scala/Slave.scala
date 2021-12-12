@@ -1,8 +1,5 @@
 import com.example.protos.main.{HandShakeRequest, MainGrpc, ReceiveSampledKeysRequest, RequestDataOnceRequest, SendDataRequest, ShareSampledKeysRequest}
 import com.example.protos.main.MainGrpc.MainBlockingStub
-import com.sun.tools.javac.util.StringUtils
-import java.util.Base64
-import java.nio.charset.StandardCharsets
 import java.net._
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
