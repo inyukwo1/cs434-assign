@@ -10,9 +10,9 @@ class MasterServerImpl(masterLogicToGRPCServer: MasterLogicToGRPCServer) extends
   private[this] val logger = Logger.getLogger(classOf[MasterServerImpl].getName)
   override def handShake(request: HandShakeRequest): Future[HandShakeReply] = {
     masterLogicToGRPCServer.waitReset()
-    val reply = HandShakeReply(numSlaves = masterLogicToGRPCServer.slaveNum)
-    masterLogicToGRPCServer.responseHandShake(request.ip, request.id)
+    masterLogicToGRPCServer.responseHandShake(request.ip, request.id, request.threadsPerNode)
     masterLogicToGRPCServer.waitResponse()
+    val reply = HandShakeReply(numThreads = masterLogicToGRPCServer.numThreads)
     Future.successful(reply)
   }
 

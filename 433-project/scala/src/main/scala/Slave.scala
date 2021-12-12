@@ -21,10 +21,10 @@ object Slave {
     val idxcolon = args(1).indexOf(":")
     val client = Slave(args(1).substring(0, idxcolon), args(1).substring(idxcolon + 1).toInt, args.slice(2, args.length - 2), args(args.length - 1))
     try {
-      val numSlaves = client.handShake()
+      val numThreads = client.handShake()
       val sortedFilePaths = client.externalSort()
       println("External sort done")
-      client.sendSampledKeys(sortedFilePaths, numSlaves)
+      client.sendSampledKeys(sortedFilePaths, numThreads)
       val sortedKeys: List[Array[Byte]] = client.receiveSortedSampledKeys()
       val readers = sortedFilePaths.map(new GensortFileReader(_))
       var iterator_and_head = readers.map((f: GensortFileReader)=> {
@@ -36,7 +36,6 @@ object Slave {
         iterator_and_head = client.sendDataOnce(iterator_and_head, f)
         client.receiveAndWriteData()
       })
-      // TODO
       client.sendLast(iterator_and_head)
       client.receiveAndWriteData()
 
@@ -57,6 +56,10 @@ class Slave private(
   private[this] val logger = Logger.getLogger(classOf[Slave].getName)
   val id: String = java.util.UUID.randomUUID.toString
 
+  def threadsInMyNode(): Int = {
+    inputDirs.flatMap(getListOfFiles).length
+  }
+
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(5, TimeUnit.SECONDS)
   }
@@ -66,11 +69,11 @@ class Slave private(
     val localIpAddress: String = localhost.getHostAddress
 
     logger.info("Handshaking, I'm " + localIpAddress + ", " + id)
-    val request = HandShakeRequest(ip = localIpAddress, id = id)
+    val request = HandShakeRequest(ip = localIpAddress, id = id, threadsPerNode = threadsInMyNode())
     try {
       val response = blockingStub.handShake(request)
       logger.info("Handshake done")
-      response.numSlaves
+      response.numThreads
     }
     catch {
       case e: StatusRuntimeException =>
@@ -97,18 +100,18 @@ class Slave private(
     }}
   }
 
-  def sendSampledKeys(sortedFilePaths: ParArray[String], numSlaves: Int): Unit = {
+  def sendSampledKeys(sortedFilePaths: ParArray[String], numThreads: Int): Unit = {
     val sampledKeys: List[Array[Byte]] = sortedFilePaths.flatMap((f: String)=> {
       val fileReader = new GensortFileReader(f)
       val iterator = fileReader.stream().iterator
       val sampledKeys = new ListBuffer[Array[Byte]]()
 
-      iterator.drop(10000 / numSlaves)
+      iterator.drop(160000 / numThreads)
       while (iterator.nonEmpty) {
         sampledKeys.synchronized {
           sampledKeys += iterator.next()
         }
-        iterator.drop(10000 / numSlaves)
+        iterator.drop(160000 / numThreads)
       }
       fileReader.close()
       sampledKeys

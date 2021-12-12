@@ -7,6 +7,7 @@ class MasterLogicToGRPCServer(val slaveNum: Int) {
   // For handshake
   var ips = new ListBuffer[String]()
   var ids = new ListBuffer[String]()
+  var numThreads = 0
   // For receiveSampledKeys
   var sampledKeys = new ListBuffer[Array[Byte]]()
   // For shareSampledKeys
@@ -18,10 +19,11 @@ class MasterLogicToGRPCServer(val slaveNum: Int) {
   var sendDataIdx = 0
   var sendDataId = ""
 
-  def responseHandShake(ip: String, id: String): Unit = {
+  def responseHandShake(ip: String, id: String, numThreadsPerNode: Int): Unit = {
     this.synchronized {
       ips += ip
       ids += id
+      numThreads += numThreadsPerNode
     }
     response()
   }
