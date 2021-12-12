@@ -30,6 +30,7 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
       val targetId = ids(targetSlaveIndex)
       sendData(index, sortedReceivedData, targetId)
     })
+    logger.info("Receive / Distributing: " + sampledKeysLength)
     val receivedData: List[Array[Byte]] = requestDataOnce()
     val sortedReceivedData = receivedData.sortWith(SortUtils.compare)
     sendData(sampledKeysLength, sortedReceivedData, ids.last)

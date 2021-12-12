@@ -194,6 +194,7 @@ class Slave private(
     try {
       val response = blockingStub.sendData(request)
       if (response.data.nonEmpty) {
+        logger.log(Level.INFO, "writing " + response.index)
         val writer = new GensortFileWriter(outputDir + "/partition." + response.index)
         response.data.foreach((f: String) => writer.write(SortUtils.decodeString(f)))
         writer.close()
