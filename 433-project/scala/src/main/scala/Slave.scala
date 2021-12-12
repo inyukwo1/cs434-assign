@@ -36,6 +36,10 @@ object Slave {
         iterator_and_head = client.sendDataOnce(iterator_and_head, f)
         client.receiveAndWriteData()
       })
+      // TODO
+      client.sendLast(iterator_and_head)
+      client.receiveAndWriteData()
+
       readers.foreach(_.close())
       sortedFilePaths.foreach(new File(_).delete())
     } finally {
@@ -156,6 +160,28 @@ class Slave private(
         logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus)
     }
     new_iteraor_and_head
+  }
+  def sendLast(iterator_and_head: ParArray[(Iterator[Array[Byte]], Option[Array[Byte]])]): Unit = {
+    val data = new ListBuffer[Array[Byte]]()
+    val new_iteraor_and_head: ParArray[(Iterator[Array[Byte]], Option[Array[Byte]])] = iterator_and_head.map((f: (Iterator[Array[Byte]], Option[Array[Byte]]))=> {
+      var (it, head) = f
+      while (head.nonEmpty) {
+        data.synchronized {
+          data += head.get
+        }
+        if (it.hasNext) head = Option(it.next())
+        else head = None
+      }
+      (it, head)
+    })
+    val request = RequestDataOnceRequest(data = data.map(SortUtils.encodeBytes))
+    try {
+      blockingStub.requestDataOnce(request)
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus)
+    }
   }
 
   def receiveAndWriteData() = {

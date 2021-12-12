@@ -1,4 +1,5 @@
 import java.util.logging.Logger
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
@@ -8,17 +9,18 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
     println(ips.mkString(", "))
     val samplesKeys: List[Array[Byte]] = receiveSampledKeys()
 
-    def toDistinct(head: Array[Byte], sampledKeys: List[Array[Byte]]): List[Array[Byte]] = {
-      if (sampledKeys.isEmpty) head :: List()
-      else if (SortUtils.compareInt(head, sampledKeys.head) == 0) toDistinct(head, sampledKeys.tail)
-      else head :: toDistinct(sampledKeys.head, sampledKeys.tail)
+    @tailrec
+    def toDistinct(output: List[Array[Byte]], remainingInput: List[Array[Byte]]): List[Array[Byte]] = {
+      if (remainingInput.isEmpty) output
+      else if (SortUtils.compareInt(output.last, remainingInput.head) == 0) toDistinct(output, remainingInput.tail)
+      else toDistinct(output :+ remainingInput.head, remainingInput.tail)
     }
     val sorted = samplesKeys.sortWith(SortUtils.compare)
-    val sortedSampledKeys = toDistinct(sorted.head, sorted.tail)
+    val sortedSampledKeys = toDistinct(List(sorted.head), sorted.tail)
     shareSampledKeys(sortedSampledKeys)
     val sampledKeysLength = sortedSampledKeys.length
     logger.info("Sampled keys length: " + sampledKeysLength)
-    List.range(0, sampledKeysLength).foreach((index: Int)=> {
+    List.range(0, sampledKeysLength + 1).foreach((index: Int)=> {
       logger.info("Receive / Distributing: " + index + ", " + SortUtils.bytesToString(sortedSampledKeys(index)))
       val receivedData: List[Array[Byte]] = requestDataOnce()
       logger.info("Received: " + receivedData.length + ", " + masterLogicToGRPCServer.responseCount)
