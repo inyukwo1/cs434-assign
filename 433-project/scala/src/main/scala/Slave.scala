@@ -11,7 +11,7 @@ import scala.collection.parallel.mutable.ParArray
 
 object Slave {
   def apply(host: String, port: Int, inputDirs: Array[String], outputDir: String): Slave = {
-    val channel = ManagedChannelBuilder.forAddress(host, port).maxInboundMessageSize(320000000).usePlaintext().build
+    val channel = ManagedChannelBuilder.forAddress(host, port).maxInboundMessageSize(100000000).usePlaintext().build
     val blockingStub = MainGrpc.blockingStub(channel)
     new Slave(channel, blockingStub, inputDirs, outputDir)
   }
@@ -25,7 +25,9 @@ object Slave {
       val sortedFilePaths = client.externalSort()
       println("External sort done")
       client.sendSampledKeys(sortedFilePaths, numThreads)
+      println("Receiving sampled keys")
       val sortedKeys: List[Array[Byte]] = client.receiveSortedSampledKeys()
+      println("Receiving done")
       val readers = sortedFilePaths.map(new GensortFileReader(_))
       var iterator_and_head = readers.map((f: GensortFileReader)=> {
         val iterator = f.stream().iterator
@@ -106,12 +108,12 @@ class Slave private(
       val iterator = fileReader.stream().iterator
       val sampledKeys = new ListBuffer[Array[Byte]]()
 
-      iterator.drop(160000 / numThreads)
+      iterator.drop(500000 / numThreads)
       while (iterator.nonEmpty) {
         sampledKeys.synchronized {
           sampledKeys += iterator.next()
         }
-        iterator.drop(160000 / numThreads)
+        iterator.drop(500000 / numThreads)
       }
       fileReader.close()
       sampledKeys

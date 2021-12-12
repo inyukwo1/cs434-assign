@@ -30,7 +30,7 @@ class Master(executionContext: ExecutionContext, numSlaves: Int) { self =>
     }
     val masterLogicToGRPCServer: MasterLogicToGRPCServer = new MasterLogicToGRPCServer(numSlaves)
 
-    server = ServerBuilder.forPort(Master.port).addService(MainGrpc.bindService(new MasterServerImpl(masterLogicToGRPCServer), executionContext)).maxInboundMessageSize(320000000).build.start
+    server = ServerBuilder.forPort(Master.port).addService(MainGrpc.bindService(new MasterServerImpl(masterLogicToGRPCServer), executionContext)).maxInboundMessageSize(100000000).build.start
     val localhost: InetAddress = InetAddress.getLocalHost
     val localIpAddress: String = localhost.getHostAddress
     Master.logger.info("Server started, listening on " + localIpAddress + ":" + Master.port)

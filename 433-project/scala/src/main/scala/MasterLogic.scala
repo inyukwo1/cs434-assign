@@ -17,6 +17,7 @@ class MasterLogic(masterLogicToGRPCServer: MasterLogicToGRPCServer) {
     }
     val sorted = samplesKeys.sortWith(SortUtils.compare)
     val sortedSampledKeys = toDistinct(List(sorted.head), sorted.tail)
+    logger.info("Sorting sampled keys")
     shareSampledKeys(sortedSampledKeys)
     val sampledKeysLength = sortedSampledKeys.length
     logger.info("Sampled keys length: " + sampledKeysLength)
