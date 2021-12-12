@@ -86,11 +86,11 @@ class Slave private(
 
   def externalSort(): ParArray[String] = {
     val fileList = inputDirs.flatMap(getListOfFiles)
-    fileList.par map((f: String) => {
-      val sortedFilePath = f + "_sorted"
+    fileList.zipWithIndex.par.map {case (f: String, i: Int) => {
+      val sortedFilePath = outputDir + "/" + i.toString + "_sorted"
       new ExternalSorting(f, sortedFilePath, 100000).sort()
       sortedFilePath
-    })
+    }}
   }
 
   def sendSampledKeys(sortedFilePaths: ParArray[String], numSlaves: Int): Unit = {
